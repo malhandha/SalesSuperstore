@@ -1,0 +1,128 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Superstore Dashboard</title>
+
+    <link rel="stylesheet" href="style.css" />
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <div>
+                <h1>Superstore Dashboard</h1>
+                <p>Interactive Sales Analytics by Muhammad Alfian Handi Yudha</p>
+            </div>
+
+            <div class="filters">
+                <select id="regionFilter">
+                    <option value="All">All Region</option>
+                </select>
+
+                <select id="categoryFilter">
+                    <option value="All">All Category</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- KPI -->
+        <div class="kpi-grid">
+
+            <div class="card kpi-card">
+                <h3>Total Sales</h3>
+                <h2 id="totalSales">$0</h2>
+            </div>
+
+            <div class="card kpi-card">
+                <h3>Total Profit</h3>
+                <h2 id="totalProfit">$0</h2>
+            </div>
+
+            <div class="card kpi-card">
+                <h3>Total Orders</h3>
+                <h2 id="totalOrders">0</h2>
+            </div>
+
+            <div class="card kpi-card">
+                <h3>Average Discount</h3>
+                <h2 id="avgDiscount">0%</h2>
+            </div>
+
+        </div>
+
+        <!-- INSIGHT
+        <div class="card insight-card">
+        
+            <h2>Business Insight</h2>
+        
+            <div class="insight-grid">
+        
+                <div class="insight-box">
+                    <p>Top Category</p>
+                    <h3 id="topCategory">-</h3>
+                </div>
+        
+                <div class="insight-box">
+                    <p>Best Segment</p>
+                    <h3 id="bestSegment">-</h3>
+                </div>
+        
+                <div class="insight-box">
+                    <p>Highest Region</p>
+                    <h3 id="topRegion">-</h3>
+                </div>
+        
+            </div>
+        
+        </div>
+        
+        </div> -->
+        <!-- CHART -->
+        <div class="chart-grid">
+
+            <div class="card chart-card">
+                <h2>Sales by Category</h2>
+                <svg id="barChart"></svg>
+            </div>
+
+            <div class="card chart-card">
+                <h2>Sales by Segment</h2>
+                <svg id="pieChart"></svg>
+            </div>
+
+            <div class="card chart-card full-width">
+                <h2>Profit Trend</h2>
+                <svg id="lineChart"></svg>
+            </div>
+
+            <!-- <div class="card chart-card">
+                <h2>Sales by Region</h2>
+                <svg id="regionChart"></svg>
+            </div>
+
+            <div class="card chart-card">
+                <h2>Top 5 Products</h2>
+                <svg id="productChart"></svg>
+            </div> -->
+
+        </div>
+
+        
+
+    <!-- TOOLTIP -->
+    <div id="tooltip"></div>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
