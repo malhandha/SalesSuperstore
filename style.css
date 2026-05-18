@@ -200,3 +200,28 @@ svg{
   }
 
 }
+#radialTree {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: auto;
+}
+
+#radialTree svg {
+    max-width: 100%;
+}
+
+#tooltip {
+    position: absolute;
+    background: #111827;
+    color: white;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    pointer-events: none;
+    opacity: 0;
+    transition: 0.2s;
+    border: 1px solid #334155;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
