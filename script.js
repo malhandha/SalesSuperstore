@@ -48,19 +48,13 @@ d3.csv("data/superstore.csv").then((data) => {
   }
 
   function updateDashboard(filtered) {
-    updateKPI(filtered);
+   updateKPI(filtered);
 
-    createBarChart(filtered);
+  createBarChart(filtered);
 
-    createPieChart(filtered);
+  createPieChart(filtered);
 
-    createLineChart(filtered);
-
-    createRegionChart(filtered);
-
-    createProductChart(filtered);
-
-    updateInsights(filtered);
+  drawRadialTree(filtered);
   }
 });
 
