@@ -1,69 +1,17 @@
-// script.js
-
-d3.csv("data/superstore.csv").then((data) => {
-  data.forEach((d) => {
-    d.Sales = +d.Sales;
-    d.Profit = +d.Profit;
-    d.Discount = +d.Discount;
-    d.Quantity = +d.Quantity;
-  });
-
-  const regionFilter = d3.select("#regionFilter");
-  const categoryFilter = d3.select("#categoryFilter");
-
-  // REGION FILTER
-  const regions = [...new Set(data.map((d) => d.Region))];
-
-  regions.forEach((region) => {
-    regionFilter.append("option").attr("value", region).text(region);
-  });
-
-  // CATEGORY FILTER
-  const categories = [...new Set(data.map((d) => d.Category))];
-
-  categories.forEach((category) => {
-    categoryFilter.append("option").attr("value", category).text(category);
-  });
-
-  updateDashboard(data);
-
-  regionFilter.on("change", applyFilters);
-  categoryFilter.on("change", applyFilters);
-
-  function applyFilters() {
-    let filtered = data;
-
-    const selectedRegion = regionFilter.property("value");
-    const selectedCategory = categoryFilter.property("value");
-
-    if (selectedRegion !== "All") {
-      filtered = filtered.filter((d) => d.Region === selectedRegion);
-    }
-
-    if (selectedCategory !== "All") {
-      filtered = filtered.filter((d) => d.Category === selectedCategory);
-    }
-
-    updateDashboard(filtered);
-  }
-
-  function updateDashboard(filtered) {
-   updateKPI(filtered);
-
-  createBarChart(filtered);
-
-  createPieChart(filtered);
-
-  drawRadialTree(filtered);
-  }
-});
+// ===============================
+// SUPERSTORE DASHBOARD
+// ===============================
 
 const tooltip = d3.select("#tooltip");
 
-function showTooltip(event, text) {
+// ===============================
+// TOOLTIP
+// ===============================
+
+function showTooltip(event, html) {
   tooltip
     .style("opacity", 1)
-    .html(text)
+    .html(html)
     .style("left", event.pageX + 15 + "px")
     .style("top", event.pageY - 28 + "px");
 }
@@ -72,86 +20,225 @@ function hideTooltip() {
   tooltip.style("opacity", 0);
 }
 
-function updateKPI(data) {
-  const totalSales = d3.sum(data, (d) => d.Sales);
+// ===============================
+// LOAD CSV
+// ===============================
 
-  const totalProfit = d3.sum(data, (d) => d.Profit);
+d3.csv("data/superstore.csv").then((data) => {
+
+  // ===============================
+  // FORMAT DATA
+  // ===============================
+
+  data.forEach((d) => {
+    d.Sales = +d.Sales || 0;
+    d.Profit = +d.Profit || 0;
+    d.Discount = +d.Discount || 0;
+    d.Quantity = +d.Quantity || 0;
+  });
+
+  // ===============================
+  // FILTER ELEMENTS
+  // ===============================
+
+  const regionFilter = d3.select("#regionFilter");
+  const categoryFilter = d3.select("#categoryFilter");
+
+  // ===============================
+  // REGION OPTIONS
+  // ===============================
+
+  const regions = [...new Set(data.map(d => d.Region))];
+
+  regions.forEach(region => {
+    regionFilter
+      .append("option")
+      .attr("value", region)
+      .text(region);
+  });
+
+  // ===============================
+  // CATEGORY OPTIONS
+  // ===============================
+
+  const categories = [...new Set(data.map(d => d.Category))];
+
+  categories.forEach(category => {
+    categoryFilter
+      .append("option")
+      .attr("value", category)
+      .text(category);
+  });
+
+  // ===============================
+  // FILTER EVENTS
+  // ===============================
+
+  regionFilter.on("change", applyFilters);
+  categoryFilter.on("change", applyFilters);
+
+  // ===============================
+  // INITIAL LOAD
+  // ===============================
+
+  updateDashboard(data);
+
+  // ===============================
+  // APPLY FILTERS
+  // ===============================
+
+  function applyFilters() {
+
+    let filtered = data;
+
+    const selectedRegion = regionFilter.property("value");
+    const selectedCategory = categoryFilter.property("value");
+
+    if (selectedRegion !== "All") {
+      filtered = filtered.filter(
+        d => d.Region === selectedRegion
+      );
+    }
+
+    if (selectedCategory !== "All") {
+      filtered = filtered.filter(
+        d => d.Category === selectedCategory
+      );
+    }
+
+    updateDashboard(filtered);
+  }
+
+  // ===============================
+  // UPDATE DASHBOARD
+  // ===============================
+
+  function updateDashboard(filtered) {
+
+    updateKPI(filtered);
+
+    createBarChart(filtered);
+
+    createPieChart(filtered);
+
+    drawRadialTree(filtered);
+
+  }
+
+});
+
+// ===============================
+// KPI
+// ===============================
+
+function updateKPI(data) {
+
+  const totalSales = d3.sum(data, d => d.Sales);
+
+  const totalProfit = d3.sum(data, d => d.Profit);
 
   const totalOrders = data.length;
 
-  const avgDiscount = d3.mean(data, (d) => d.Discount);
+  const avgDiscount = d3.mean(data, d => d.Discount);
 
-  d3.select("#totalSales").text("$" + Math.round(totalSales).toLocaleString());
+  d3.select("#totalSales")
+    .text("$" + Math.round(totalSales).toLocaleString());
 
-  d3.select("#totalProfit").text(
-    "$" + Math.round(totalProfit).toLocaleString()
-  );
+  d3.select("#totalProfit")
+    .text("$" + Math.round(totalProfit).toLocaleString());
 
-  d3.select("#totalOrders").text(totalOrders);
+  d3.select("#totalOrders")
+    .text(totalOrders);
 
-  d3.select("#avgDiscount").text((avgDiscount * 100).toFixed(1) + "%");
+  d3.select("#avgDiscount")
+    .text((avgDiscount * 100).toFixed(1) + "%");
 }
 
+// ===============================
+// BAR CHART
+// ===============================
+
 function createBarChart(data) {
+
   const svg = d3.select("#barChart");
 
   svg.selectAll("*").remove();
 
   const width = 700;
   const height = 400;
-  const margin = { top: 20, right: 20, bottom: 50, left: 70 };
+
+  svg
+    .attr("width", width)
+    .attr("height", height);
+
+  const margin = {
+    top: 20,
+    right: 20,
+    bottom: 60,
+    left: 70
+  };
 
   const grouped = d3.rollups(
     data,
-    (v) => d3.sum(v, (d) => d.Sales),
-    (d) => d.Category
+    v => d3.sum(v, d => d.Sales),
+    d => d.Category
   );
 
-  const x = d3
-    .scaleBand()
-    .domain(grouped.map((d) => d[0]))
+  const x = d3.scaleBand()
+    .domain(grouped.map(d => d[0]))
     .range([margin.left, width - margin.right])
-    .padding(0.3);
+    .padding(0.35);
 
-  const y = d3
-    .scaleLinear()
-    .domain([0, d3.max(grouped, (d) => d[1])])
+  const y = d3.scaleLinear()
+    .domain([0, d3.max(grouped, d => d[1])])
     .nice()
     .range([height - margin.bottom, margin.top]);
 
-  svg
-    .append("g")
-    .attr("transform", `translate(0,${height - margin.bottom})`)
+  // AXIS
+
+  svg.append("g")
+    .attr(
+      "transform",
+      `translate(0,${height - margin.bottom})`
+    )
     .call(d3.axisBottom(x))
     .selectAll("text")
-    .style("fill", "white");
+    .style("fill", "#fff");
 
-  svg
-    .append("g")
-    .attr("transform", `translate(${margin.left},0)`)
+  svg.append("g")
+    .attr(
+      "transform",
+      `translate(${margin.left},0)`
+    )
     .call(d3.axisLeft(y))
     .selectAll("text")
-    .style("fill", "white");
+    .style("fill", "#fff");
 
-  svg
-    .selectAll(".bar")
+  // BARS
+
+  svg.selectAll(".bar")
     .data(grouped)
     .enter()
     .append("rect")
     .attr("class", "bar")
-    .attr("x", (d) => x(d[0]))
+    .attr("x", d => x(d[0]))
     .attr("y", height - margin.bottom)
     .attr("width", x.bandwidth())
     .attr("height", 0)
+    .attr("rx", 10)
+    .attr("fill", "#8b5cf6")
 
     .on("mousemove", (event, d) => {
+
       showTooltip(
         event,
         `
-        <b>${d[0]}</b><br>
+        <strong>${d[0]}</strong>
+        <br>
         Sales: $${Math.round(d[1]).toLocaleString()}
-      `
+        `
       );
+
     })
 
     .on("mouseout", hideTooltip)
@@ -159,34 +246,58 @@ function createBarChart(data) {
     .transition()
     .duration(1000)
 
-    .attr("y", (d) => y(d[1]))
-    .attr("height", (d) => height - margin.bottom - y(d[1]));
+    .attr("y", d => y(d[1]))
+    .attr(
+      "height",
+      d => height - margin.bottom - y(d[1])
+    );
+
 }
 
+// ===============================
+// PIE CHART
+// ===============================
+
 function createPieChart(data) {
+
   const svg = d3.select("#pieChart");
 
   svg.selectAll("*").remove();
 
   const width = 450;
   const height = 400;
-  const radius = 150;
+
+  svg
+    .attr("width", width)
+    .attr("height", height);
+
+  const radius = 140;
 
   const grouped = d3.rollups(
     data,
-    (v) => d3.sum(v, (d) => d.Sales),
-    (d) => d.Segment
+    v => d3.sum(v, d => d.Sales),
+    d => d.Segment
   );
 
-  const color = d3.scaleOrdinal().range(["#38bdf8", "#8b5cf6", "#998ef9 "]);
+  const color = d3.scaleOrdinal()
+    .range([
+      "#38bdf8",
+      "#8b5cf6",
+      "#c8ff00"
+    ]);
 
-  const pie = d3.pie().value((d) => d[1]);
+  const pie = d3.pie()
+    .value(d => d[1]);
 
-  const arc = d3.arc().innerRadius(0).outerRadius(radius);
+  const arc = d3.arc()
+    .innerRadius(60)
+    .outerRadius(radius);
 
-  const g = svg
-    .append("g")
-    .attr("transform", `translate(${width / 2},${height / 2})`);
+  const g = svg.append("g")
+    .attr(
+      "transform",
+      `translate(${width / 2},${height / 2})`
+    );
 
   g.selectAll("path")
     .data(pie(grouped))
@@ -194,465 +305,273 @@ function createPieChart(data) {
     .append("path")
     .attr("d", arc)
     .attr("fill", (d, i) => color(i))
-    .attr("stroke", "#020617")
-    .style("stroke-width", "3px")
+    .attr("stroke", "#0f172a")
+    .style("stroke-width", "4px")
 
     .on("mousemove", (event, d) => {
+
       showTooltip(
         event,
         `
-        <b>${d.data[0]}</b><br>
+        <strong>${d.data[0]}</strong>
+        <br>
         Sales: $${Math.round(d.data[1]).toLocaleString()}
-      `
+        `
       );
+
     })
 
     .on("mouseout", hideTooltip)
 
     .transition()
     .duration(1000)
-    .attrTween("d", function (d) {
-      const i = d3.interpolate(d.startAngle + 0.1, d.endAngle);
+    .attrTween("d", function(d) {
 
-      return function (t) {
+      const i = d3.interpolate(
+        d.startAngle,
+        d.endAngle
+      );
+
+      return function(t) {
+
         d.endAngle = i(t);
+
         return arc(d);
+
       };
+
     });
+
 }
 
-function createLineChart(data) {
-  const svg = d3.select("#lineChart");
-
-  svg.selectAll("*").remove();
-
-  const width = 1200;
-  const height = 400;
-
-  const margin = { top: 20, right: 30, bottom: 50, left: 70 };
-
-  const parseDate = d3.timeParse("%m/%d/%Y");
-
-  data.forEach((d) => {
-    d.date = parseDate(d["Order Date"]);
-  });
-
-  const monthly = d3.rollups(
-    data,
-    (v) => d3.sum(v, (d) => d.Profit),
-    (d) => d3.timeMonth(d.date)
-  );
-
-  monthly.sort((a, b) => a[0] - b[0]);
-
-  const x = d3
-    .scaleTime()
-    .domain(d3.extent(monthly, (d) => d[0]))
-    .range([margin.left, width - margin.right]);
-
-  const y = d3
-    .scaleLinear()
-    .domain([0, d3.max(monthly, (d) => d[1])])
-    .nice()
-    .range([height - margin.bottom, margin.top]);
-
-  svg
-    .append("g")
-    .attr("transform", `translate(0,${height - margin.bottom})`)
-    .call(d3.axisBottom(x).ticks(6).tickFormat(d3.timeFormat("%b %Y")))
-    .selectAll("text")
-    .style("fill", "white");
-
-  svg
-    .append("g")
-    .attr("transform", `translate(${margin.left},0)`)
-    .call(d3.axisLeft(y))
-    .selectAll("text")
-    .style("fill", "white");
-
-  const line = d3
-    .line()
-    .x((d) => x(d[0]))
-    .y((d) => y(d[1]))
-    .curve(d3.curveMonotoneX);
-
-  const path = svg
-    .append("path")
-    .datum(monthly)
-    .attr("class", "line")
-    .attr("d", line);
-
-  const length = path.node().getTotalLength();
-
-  path
-    .attr("stroke-dasharray", length + " " + length)
-    .attr("stroke-dashoffset", length)
-    .transition()
-    .duration(2000)
-    .attr("stroke-dashoffset", 0);
-}
-
-function createRegionChart(data) {
-  const svg = d3.select("#regionChart");
-
-  svg.selectAll("*").remove();
-
-  const width = 600;
-  const height = 400;
-  const margin = { top: 20, right: 20, bottom: 40, left: 100 };
-
-  const grouped = d3.rollups(
-    data,
-    (v) => d3.sum(v, (d) => d.Sales),
-    (d) => d.Region
-  );
-
-  const y = d3
-    .scaleBand()
-    .domain(grouped.map((d) => d[0]))
-    .range([margin.top, height - margin.bottom])
-    .padding(0.3);
-
-  const x = d3
-    .scaleLinear()
-    .domain([0, d3.max(grouped, (d) => d[1])])
-    .nice()
-    .range([margin.left, width - margin.right]);
-
-  svg
-    .append("g")
-    .attr("transform", `translate(${margin.left},0)`)
-    .call(d3.axisLeft(y))
-    .selectAll("text")
-    .style("fill", "white");
-
-  svg
-    .append("g")
-    .attr("transform", `translate(0,${height - margin.bottom})`)
-    .call(d3.axisBottom(x))
-    .selectAll("text")
-    .style("fill", "white");
-
-  svg
-    .selectAll("rect")
-    .data(grouped)
-    .enter()
-    .append("rect")
-    .attr("x", margin.left)
-    .attr("y", (d) => y(d[0]))
-    .attr("height", y.bandwidth())
-    .attr("width", 0)
-    .attr("fill", "#8b5cf6")
-
-    .transition()
-    .duration(1000)
-
-    .attr("width", (d) => x(d[1]) - margin.left);
-}
-
-function createProductChart(data) {
-  const svg = d3.select("#productChart");
-
-  svg.selectAll("*").remove();
-
-  const width = 700;
-  const height = 400;
-  const margin = { top: 20, right: 20, bottom: 120, left: 70 };
-
-  let grouped = d3.rollups(
-    data,
-    (v) => d3.sum(v, (d) => d.Sales),
-    (d) => d["Product Name"]
-  );
-
-  grouped = grouped.sort((a, b) => b[1] - a[1]).slice(0, 5);
-
-  const x = d3
-    .scaleBand()
-    .domain(grouped.map((d) => d[0]))
-    .range([margin.left, width - margin.right])
-    .padding(0.3);
-
-  const y = d3
-    .scaleLinear()
-    .domain([0, d3.max(grouped, (d) => d[1])])
-    .nice()
-    .range([height - margin.bottom, margin.top]);
-
-  svg
-    .append("g")
-    .attr("transform", `translate(0,${height - margin.bottom})`)
-    .call(d3.axisBottom(x))
-    .selectAll("text")
-    .style("fill", "white")
-    .attr("transform", "rotate(-15)")
-    .style("text-anchor", "end");
-
-  svg
-    .append("g")
-    .attr("transform", `translate(${margin.left},0)`)
-    .call(d3.axisLeft(y))
-    .selectAll("text")
-    .style("fill", "white");
-
-  svg
-    .selectAll("rect")
-    .data(grouped)
-    .enter()
-    .append("rect")
-    .attr("x", (d) => x(d[0]))
-    .attr("y", (d) => y(d[1]))
-    .attr("width", x.bandwidth())
-    .attr("height", (d) => height - margin.bottom - y(d[1]))
-    .attr("fill", "#06b6d4");
-}
-
-function updateInsights(data) {
-  const topCategory = d3
-    .rollups(
-      data,
-      (v) => d3.sum(v, (d) => d.Sales),
-      (d) => d.Category
-    )
-    .sort((a, b) => b[1] - a[1])[0][0];
-
-  const bestSegment = d3
-    .rollups(
-      data,
-      (v) => d3.sum(v, (d) => d.Sales),
-      (d) => d.Segment
-    )
-    .sort((a, b) => b[1] - a[1])[0][0];
-
-  const topRegion = d3
-    .rollups(
-      data,
-      (v) => d3.sum(v, (d) => d.Profit),
-      (d) => d.Region
-    )
-    .sort((a, b) => b[1] - a[1])[0][0];
-
-  d3.select("#topCategory").text(topCategory);
-
-  d3.select("#bestSegment").text(bestSegment);
-
-  d3.select("#topRegion").text(topRegion);
-}
+// ===============================
+// RADIAL TREE
+// ===============================
 
 function drawRadialTree(data) {
 
-    d3.select("#radialTree").html("");
+  d3.select("#radialTree").html("");
 
-    const width = 850;
-    const height = 850;
+  const width = 850;
+  const height = 850;
 
-    const radius = width / 2 - 100;
+  const radius = width / 2 - 100;
 
-    const svg = d3.select("#radialTree")
-        .append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .append("g")
-        .attr(
-            "transform",
-            `translate(${width / 2}, ${height / 2})`
-        );
-
-    // ===============================
-    // HIERARCHY
-    // Region -> Category -> SubCategory
-    // ===============================
-
-    const hierarchyData = {
-        name: "Superstore",
-        children: []
-    };
-
-    const regionMap = d3.group(
-        data,
-        d => d.Region,
-        d => d.Category,
-        d => d["Sub-Category"]
+  const svg = d3.select("#radialTree")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .append("g")
+    .attr(
+      "transform",
+      `translate(${width / 2},${height / 2})`
     );
 
-    regionMap.forEach((catMap, region) => {
+  // ===============================
+  // HIERARCHY
+  // ===============================
 
-        const regionNode = {
-            name: region,
-            children: []
-        };
+  const hierarchyData = {
+    name: "Superstore",
+    children: []
+  };
 
-        catMap.forEach((subMap, category) => {
+  const regionMap = d3.group(
+    data,
+    d => d.Region,
+    d => d.Category,
+    d => d["Sub-Category"]
+  );
 
-            const categoryNode = {
-                name: category,
-                children: []
-            };
+  regionMap.forEach((catMap, region) => {
 
-            subMap.forEach((items, subCategory) => {
+    const regionNode = {
+      name: region,
+      children: []
+    };
 
-                const totalProfit = d3.sum(
-                    items,
-                    d => d.Profit
-                );
+    catMap.forEach((subMap, category) => {
 
-                categoryNode.children.push({
-                    name: subCategory,
-                    value: totalProfit
-                });
+      const categoryNode = {
+        name: category,
+        children: []
+      };
 
-            });
+      subMap.forEach((items, subCategory) => {
 
-            regionNode.children.push(categoryNode);
+        const totalProfit = d3.sum(
+          items,
+          d => d.Profit
+        );
 
+        categoryNode.children.push({
+          name: subCategory,
+          value: Math.round(totalProfit)
         });
 
-        hierarchyData.children.push(regionNode);
+      });
+
+      regionNode.children.push(categoryNode);
 
     });
 
-    // ===============================
-    // TREE
-    // ===============================
+    hierarchyData.children.push(regionNode);
 
-    const root = d3.hierarchy(hierarchyData);
+  });
 
-    const treeLayout = d3.tree()
-        .size([2 * Math.PI, radius]);
+  // ===============================
+  // TREE
+  // ===============================
 
-    treeLayout(root);
+  const root = d3.hierarchy(hierarchyData);
 
-    // ===============================
-    // LINKS
-    // ===============================
+  const treeLayout = d3.tree()
+    .size([2 * Math.PI, radius]);
 
-    svg.selectAll("path")
-        .data(root.links())
-        .enter()
-        .append("path")
-        .attr(
-            "d",
-            d3.linkRadial()
-                .angle(d => d.x)
-                .radius(d => d.y)
-        )
-        .attr("fill", "none")
-        .attr("stroke", "#2d3748")
-        .attr("stroke-width", 1.2);
+  treeLayout(root);
 
-    // ===============================
-    // COLOR
-    // ===============================
+  // ===============================
+  // LINKS
+  // ===============================
 
-    const color = d3.scaleOrdinal()
-        .domain(["Furniture", "Office Supplies", "Technology"])
-        .range([
-            "#c8ff00",
-            "#8b5cf6",
-            "#3b82f6"
-        ]);
+  svg.selectAll(".link")
+    .data(root.links())
+    .enter()
+    .append("path")
+    .attr("class", "link")
+    .attr(
+      "d",
+      d3.linkRadial()
+        .angle(d => d.x)
+        .radius(d => d.y)
+    )
+    .attr("fill", "none")
+    .attr("stroke", "#334155")
+    .attr("stroke-width", 1.3);
 
-    // ===============================
-    // NODES
-    // ===============================
+  // ===============================
+  // COLORS
+  // ===============================
 
-    const node = svg.selectAll("g")
-        .data(root.descendants())
-        .enter()
-        .append("g")
-        .attr("transform", d => `
-            rotate(${d.x * 180 / Math.PI - 90})
-            translate(${d.y},0)
-        `);
+  const color = d3.scaleOrdinal()
+    .domain([
+      "Furniture",
+      "Office Supplies",
+      "Technology"
+    ])
+    .range([
+      "#c8ff00",
+      "#8b5cf6",
+      "#38bdf8"
+    ]);
 
-    node.append("circle")
-        .attr("r", d => {
+  // ===============================
+  // NODES
+  // ===============================
 
-            if (d.depth === 0) return 12;
-            if (d.depth === 1) return 8;
-            if (d.depth === 2) return 6;
+  const node = svg.selectAll(".node")
+    .data(root.descendants())
+    .enter()
+    .append("g")
+    .attr("class", "node")
+    .attr("transform", d => `
+      rotate(${d.x * 180 / Math.PI - 90})
+      translate(${d.y},0)
+    `);
 
-            return 4;
+  node.append("circle")
+    .attr("r", d => {
 
-        })
-        .attr("fill", d => {
+      if (d.depth === 0) return 12;
+      if (d.depth === 1) return 8;
+      if (d.depth === 2) return 6;
 
-            if (d.depth === 0)
-                return "#ffffff";
+      return 4;
 
-            if (d.depth === 2)
-                return color(d.data.name);
+    })
 
-            if (d.parent && d.parent.depth === 1)
-                return color(d.parent.data.name);
+    .attr("fill", d => {
 
-            return "#94a3b8";
+      if (d.depth === 0)
+        return "#ffffff";
 
-        })
-        .style("cursor", "pointer")
-        .on("mouseover", function (event, d) {
+      if (d.depth === 1)
+        return "#64748b";
 
-            d3.select(this)
-                .attr("stroke", "#fff")
-                .attr("stroke-width", 2);
+      if (d.depth === 2)
+        return color(d.data.name);
 
-            const tooltip = d3.select("#tooltip");
+      if (d.depth === 3)
+        return color(d.parent.data.name);
 
-            tooltip
-                .style("opacity", 1)
-                .html(`
-                    <strong>${d.data.name}</strong>
-                    <br>
-                    ${d.data.value
-                        ? `Profit: $${d.data.value.toLocaleString()}`
-                        : "Hierarchy Node"}
-                `)
-                .style("left", event.pageX + 15 + "px")
-                .style("top", event.pageY - 28 + "px");
+      return "#94a3b8";
 
-        })
-        .on("mousemove", function(event){
+    })
 
-            d3.select("#tooltip")
-                .style("left", event.pageX + 15 + "px")
-                .style("top", event.pageY - 28 + "px");
+    .style("cursor", "pointer")
 
-        })
-        .on("mouseout", function () {
+    .on("mousemove", (event, d) => {
 
-            d3.select(this)
-                .attr("stroke", "none");
+      showTooltip(
+        event,
+        `
+        <strong>${d.data.name}</strong>
+        <br>
+        ${
+          d.data.value
+            ? `Profit: $${d.data.value.toLocaleString()}`
+            : "Hierarchy Node"
+        }
+        `
+      );
 
-            d3.select("#tooltip")
-                .style("opacity", 0);
+    })
 
-        });
+    .on("mouseout", hideTooltip);
 
-    // ===============================
-    // LABELS
-    // ===============================
+  // ===============================
+  // LABELS
+  // ===============================
 
-    node.append("text")
-        .attr("dy", "0.31em")
-        .attr("x", d => d.x < Math.PI ? 12 : -12)
-        .attr("text-anchor", d =>
-            d.x < Math.PI ? "start" : "end"
-        )
-        .attr("transform", d =>
-            d.x >= Math.PI ? "rotate(180)" : null
-        )
-        .text(d => d.data.name)
-        .style("fill", "#e2e8f0")
-        .style("font-size", d => {
+  node.append("text")
+    .attr("dy", "0.31em")
 
-            if (d.depth === 1) return "13px";
-            if (d.depth === 2) return "11px";
+    .attr(
+      "x",
+      d => d.x < Math.PI ? 12 : -12
+    )
 
-            return "10px";
+    .attr(
+      "text-anchor",
+      d => d.x < Math.PI ? "start" : "end"
+    )
 
-        })
-        .style("font-weight", d =>
-            d.depth <= 1 ? "700" : "400"
-        );
+    .attr(
+      "transform",
+      d => d.x >= Math.PI
+        ? "rotate(180)"
+        : null
+    )
+
+    .text(d => d.data.name)
+
+    .style("fill", "#e2e8f0")
+
+    .style("font-size", d => {
+
+      if (d.depth === 1)
+        return "13px";
+
+      if (d.depth === 2)
+        return "11px";
+
+      return "10px";
+
+    })
+
+    .style(
+      "font-weight",
+      d => d.depth <= 1 ? "700" : "400"
+    );
 
 }
