@@ -3,231 +3,204 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 *{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
 }
 
 body{
-  background:
-    radial-gradient(circle at top left,#1e3a8a 0%,transparent 30%),
-    radial-gradient(circle at bottom right,#581c87 0%,transparent 30%),
-    #020617;
+    background:
+        radial-gradient(circle at top left,#1e3a8a 0%,transparent 30%),
+        radial-gradient(circle at bottom right,#581c87 0%,transparent 30%),
+        #020617;
 
-  color:white;
-  font-family:'Inter',sans-serif;
-  padding:40px;
+    color:white;
+    font-family:'Inter',sans-serif;
+    padding:40px;
+    overflow-x:hidden;
 }
 
 .container{
-  max-width:1600px;
-  margin:auto;
+    max-width:1600px;
+    margin:auto;
 }
 
+/* =========================
+   HEADER
+========================= */
+
 .header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:30px;
-  flex-wrap:wrap;
-  gap:20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+    flex-wrap:wrap;
+    gap:20px;
 }
 
 .header h1{
-  font-size:52px;
-  font-weight:700;
+    font-size:52px;
+    font-weight:700;
 }
 
 .header p{
-  color:#94a3b8;
-  margin-top:8px;
+    color:#94a3b8;
+    margin-top:8px;
 }
 
+/* =========================
+   FILTER
+========================= */
+
 .filters{
-  display:flex;
-  gap:15px;
+    display:flex;
+    gap:15px;
+    flex-wrap:wrap;
 }
 
 select{
-  background:#0f172a;
-  border:1px solid rgba(255,255,255,0.1);
-  color:white;
-  padding:12px 18px;
-  border-radius:12px;
-  font-size:14px;
+    background:#0f172a;
+    border:1px solid rgba(255,255,255,0.1);
+    color:white;
+    padding:12px 18px;
+    border-radius:12px;
+    font-size:14px;
+    outline:none;
 }
 
+/* =========================
+   KPI
+========================= */
+
 .kpi-grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:20px;
-  margin-bottom:30px;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+    margin-bottom:30px;
 }
 
 .card{
-  background:rgba(15,23,42,0.8);
-  border:1px solid rgba(255,255,255,0.05);
-  border-radius:24px;
-  backdrop-filter:blur(10px);
-  box-shadow:
-    0 10px 40px rgba(0,0,0,0.4);
+    background:rgba(15,23,42,0.85);
+    border:1px solid rgba(255,255,255,0.05);
+    border-radius:24px;
+    backdrop-filter:blur(10px);
+    box-shadow:0 10px 40px rgba(0,0,0,0.4);
 }
 
 .kpi-card{
-  padding:30px;
+    padding:30px;
 }
 
 .kpi-card h3{
-  color:#94a3b8;
-  margin-bottom:15px;
+    color:#94a3b8;
+    margin-bottom:15px;
+    font-size:16px;
+    font-weight:500;
 }
 
 .kpi-card h2{
-  font-size:48px;
-  color:#38bdf8;
+    font-size:42px;
+    color:#38bdf8;
+    font-weight:700;
 }
 
+/* =========================
+   CHART
+========================= */
+
 .chart-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:24px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:24px;
 }
 
 .chart-card{
-  padding:24px;
+    padding:24px;
+    overflow:hidden;
 }
 
 .chart-card h2{
-  margin-bottom:20px;
+    margin-bottom:20px;
+    font-size:22px;
+    font-weight:700;
 }
 
 .full-width{
-  grid-column:span 2;
+    grid-column:span 2;
 }
 
+/* svg global */
 svg{
-  width:100%;
-  height:400px;
+    width:100%;
+    display:block;
 }
 
-.insight-card{
-  margin-top:30px;
-  padding:30px;
+/* normal chart */
+#barChart,
+#pieChart{
+    height:400px;
 }
 
-.insight-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:20px;
-  margin-top:20px;
-}
-
-.insight-box{
-  background:#0f172a;
-  padding:25px;
-  border-radius:20px;
-}
-
-.insight-box p{
-  color:#94a3b8;
-  margin-bottom:10px;
-}
-
-.insight-box h3{
-  font-size:38px;
-  color:#38bdf8;
-}
-
-#tooltip{
-  position:absolute;
-  background:#0f172a;
-  border:1px solid rgba(255,255,255,0.1);
-  padding:10px 14px;
-  border-radius:10px;
-  pointer-events:none;
-  opacity:0;
-  color:white;
-  font-size:14px;
-}
-
-.bar{
-  fill:#6366f1;
-  transition:0.3s;
-}
-
-.bar:hover{
-  fill:#38bdf8;
-}
-
-.line{
-  fill:none;
-  stroke:#38bdf8;
-  stroke-width:4;
-}
-
-@media(max-width:1200px){
-
-  .kpi-grid{
-    grid-template-columns:1fr 1fr;
-  }
-
-  .chart-grid{
-    grid-template-columns:1fr;
-  }
-
-  .full-width{
-    grid-column:span 1;
-  }
-
-  .insight-grid{
-    grid-template-columns:1fr;
-  }
-
-}
-
-@media(max-width:768px){
-
-  body{
-    padding:20px;
-  }
-
-  .header h1{
-    font-size:36px;
-  }
-
-  .kpi-grid{
-    grid-template-columns:1fr;
-  }
-
-}
 /* =========================
    RADIAL TREE
 ========================= */
 
 #radialTree{
     width:100%;
-    min-height:950px;
+    min-height:1100px;
 
     display:flex;
     justify-content:center;
     align-items:center;
 
     overflow:hidden;
-    padding:40px;
+    padding:20px;
 }
 
-/* khusus radial tree svg */
+/* radial tree svg */
 #radialTree svg{
     width:100%;
-    height:900px;
+    max-width:1200px;
+    height:1100px;
+    overflow:visible;
 }
 
-/* jangan override semua svg */
-svg{
-  width:100%;
+/* =========================
+   INSIGHT
+========================= */
+
+.insight-card{
+    margin-top:30px;
+    padding:30px;
 }
 
-/* tooltip */
+.insight-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+    margin-top:20px;
+}
+
+.insight-box{
+    background:#0f172a;
+    padding:25px;
+    border-radius:20px;
+}
+
+.insight-box p{
+    color:#94a3b8;
+    margin-bottom:10px;
+}
+
+.insight-box h3{
+    font-size:38px;
+    color:#38bdf8;
+}
+
+/* =========================
+   TOOLTIP
+========================= */
+
 #tooltip{
     position:absolute;
     background:#111827;
@@ -240,18 +213,99 @@ svg{
     transition:0.2s;
     border:1px solid #334155;
     box-shadow:0 10px 30px rgba(0,0,0,0.4);
+    z-index:9999;
 }
 
-#tooltip {
-    position: absolute;
-    background: #111827;
-    color: white;
-    padding: 10px 14px;
-    border-radius: 10px;
-    font-size: 13px;
-    pointer-events: none;
-    opacity: 0;
-    transition: 0.2s;
-    border: 1px solid #334155;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+/* =========================
+   BAR CHART
+========================= */
+
+.bar{
+    fill:#6366f1;
+    transition:0.3s;
+}
+
+.bar:hover{
+    fill:#38bdf8;
+}
+
+/* =========================
+   LINE
+========================= */
+
+.line{
+    fill:none;
+    stroke:#38bdf8;
+    stroke-width:4;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:1200px){
+
+    .kpi-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .chart-grid{
+        grid-template-columns:1fr;
+    }
+
+    .full-width{
+        grid-column:span 1;
+    }
+
+    .insight-grid{
+        grid-template-columns:1fr;
+    }
+
+    #radialTree{
+        min-height:900px;
+    }
+
+    #radialTree svg{
+        height:900px;
+    }
+
+}
+
+@media(max-width:768px){
+
+    body{
+        padding:20px;
+    }
+
+    .header{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .header h1{
+        font-size:36px;
+    }
+
+    .kpi-grid{
+        grid-template-columns:1fr;
+    }
+
+    .filters{
+        width:100%;
+        flex-direction:column;
+    }
+
+    select{
+        width:100%;
+    }
+
+    #radialTree{
+        min-height:700px;
+        padding:10px;
+    }
+
+    #radialTree svg{
+        height:700px;
+    }
+
 }
