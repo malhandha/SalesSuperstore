@@ -352,19 +352,33 @@ function drawRadialTree(data) {
 
   d3.select("#radialTree").html("");
 
-  const width = 850;
-  const height = 850;
+  // ===============================
+  // SIZE
+  // ===============================
 
-  const radius = width / 2 - 100;
+  const width = 1200;
+  const height = 900;
+
+  const radius = 320;
+
+  // ===============================
+  // SVG
+  // ===============================
 
   const svg = d3.select("#radialTree")
     .append("svg")
     .attr("width", width)
     .attr("height", height)
+
+    // bikin responsive
+    .attr("viewBox", `0 0 ${width} ${height}`)
+
     .append("g")
+
+    // CENTER
     .attr(
       "transform",
-      `translate(${width / 2},${height / 2})`
+      `translate(${width / 2}, ${height / 2})`
     );
 
   // ===============================
@@ -420,15 +434,15 @@ function drawRadialTree(data) {
   });
 
   // ===============================
-  // TREE
+  // TREE LAYOUT
   // ===============================
 
   const root = d3.hierarchy(hierarchyData);
 
-  const treeLayout = d3.tree()
+  const tree = d3.tree()
     .size([2 * Math.PI, radius]);
 
-  treeLayout(root);
+  tree(root);
 
   // ===============================
   // LINKS
@@ -447,10 +461,10 @@ function drawRadialTree(data) {
     )
     .attr("fill", "none")
     .attr("stroke", "#334155")
-    .attr("stroke-width", 1.3);
+    .attr("stroke-width", 1.2);
 
   // ===============================
-  // COLORS
+  // COLOR
   // ===============================
 
   const color = d3.scaleOrdinal()
@@ -483,8 +497,8 @@ function drawRadialTree(data) {
     .attr("r", d => {
 
       if (d.depth === 0) return 12;
-      if (d.depth === 1) return 8;
-      if (d.depth === 2) return 6;
+      if (d.depth === 1) return 9;
+      if (d.depth === 2) return 7;
 
       return 4;
 
@@ -496,7 +510,7 @@ function drawRadialTree(data) {
         return "#ffffff";
 
       if (d.depth === 1)
-        return "#64748b";
+        return "#94a3b8";
 
       if (d.depth === 2)
         return color(d.data.name);
@@ -504,11 +518,9 @@ function drawRadialTree(data) {
       if (d.depth === 3)
         return color(d.parent.data.name);
 
-      return "#94a3b8";
+      return "#cbd5e1";
 
     })
-
-    .style("cursor", "pointer")
 
     .on("mousemove", (event, d) => {
 
@@ -538,7 +550,7 @@ function drawRadialTree(data) {
 
     .attr(
       "x",
-      d => d.x < Math.PI ? 12 : -12
+      d => d.x < Math.PI ? 10 : -10
     )
 
     .attr(
@@ -560,12 +572,12 @@ function drawRadialTree(data) {
     .style("font-size", d => {
 
       if (d.depth === 1)
-        return "13px";
+        return "16px";
 
       if (d.depth === 2)
-        return "11px";
+        return "13px";
 
-      return "10px";
+      return "11px";
 
     })
 
