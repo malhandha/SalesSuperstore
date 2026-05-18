@@ -159,9 +159,8 @@ svg{
 
 /* radial tree svg */
 #radialTree svg{
-    width:100%;
-    max-width:1200px;
-    height:1100px;
+     width:100%;
+    height:auto;
     overflow:visible;
 }
 
