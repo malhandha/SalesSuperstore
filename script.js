@@ -444,3 +444,221 @@ function updateInsights(data) {
 
   d3.select("#topRegion").text(topRegion);
 }
+
+function drawRadialTree(data) {
+
+    d3.select("#radialTree").html("");
+
+    const width = 850;
+    const height = 850;
+
+    const radius = width / 2 - 100;
+
+    const svg = d3.select("#radialTree")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr(
+            "transform",
+            `translate(${width / 2}, ${height / 2})`
+        );
+
+    // ===============================
+    // HIERARCHY
+    // Region -> Category -> SubCategory
+    // ===============================
+
+    const hierarchyData = {
+        name: "Superstore",
+        children: []
+    };
+
+    const regionMap = d3.group(
+        data,
+        d => d.Region,
+        d => d.Category,
+        d => d["Sub-Category"]
+    );
+
+    regionMap.forEach((catMap, region) => {
+
+        const regionNode = {
+            name: region,
+            children: []
+        };
+
+        catMap.forEach((subMap, category) => {
+
+            const categoryNode = {
+                name: category,
+                children: []
+            };
+
+            subMap.forEach((items, subCategory) => {
+
+                const totalProfit = d3.sum(
+                    items,
+                    d => d.Profit
+                );
+
+                categoryNode.children.push({
+                    name: subCategory,
+                    value: totalProfit
+                });
+
+            });
+
+            regionNode.children.push(categoryNode);
+
+        });
+
+        hierarchyData.children.push(regionNode);
+
+    });
+
+    // ===============================
+    // TREE
+    // ===============================
+
+    const root = d3.hierarchy(hierarchyData);
+
+    const treeLayout = d3.tree()
+        .size([2 * Math.PI, radius]);
+
+    treeLayout(root);
+
+    // ===============================
+    // LINKS
+    // ===============================
+
+    svg.selectAll("path")
+        .data(root.links())
+        .enter()
+        .append("path")
+        .attr(
+            "d",
+            d3.linkRadial()
+                .angle(d => d.x)
+                .radius(d => d.y)
+        )
+        .attr("fill", "none")
+        .attr("stroke", "#2d3748")
+        .attr("stroke-width", 1.2);
+
+    // ===============================
+    // COLOR
+    // ===============================
+
+    const color = d3.scaleOrdinal()
+        .domain(["Furniture", "Office Supplies", "Technology"])
+        .range([
+            "#c8ff00",
+            "#8b5cf6",
+            "#3b82f6"
+        ]);
+
+    // ===============================
+    // NODES
+    // ===============================
+
+    const node = svg.selectAll("g")
+        .data(root.descendants())
+        .enter()
+        .append("g")
+        .attr("transform", d => `
+            rotate(${d.x * 180 / Math.PI - 90})
+            translate(${d.y},0)
+        `);
+
+    node.append("circle")
+        .attr("r", d => {
+
+            if (d.depth === 0) return 12;
+            if (d.depth === 1) return 8;
+            if (d.depth === 2) return 6;
+
+            return 4;
+
+        })
+        .attr("fill", d => {
+
+            if (d.depth === 0)
+                return "#ffffff";
+
+            if (d.depth === 2)
+                return color(d.data.name);
+
+            if (d.parent && d.parent.depth === 1)
+                return color(d.parent.data.name);
+
+            return "#94a3b8";
+
+        })
+        .style("cursor", "pointer")
+        .on("mouseover", function (event, d) {
+
+            d3.select(this)
+                .attr("stroke", "#fff")
+                .attr("stroke-width", 2);
+
+            const tooltip = d3.select("#tooltip");
+
+            tooltip
+                .style("opacity", 1)
+                .html(`
+                    <strong>${d.data.name}</strong>
+                    <br>
+                    ${d.data.value
+                        ? `Profit: $${d.data.value.toLocaleString()}`
+                        : "Hierarchy Node"}
+                `)
+                .style("left", event.pageX + 15 + "px")
+                .style("top", event.pageY - 28 + "px");
+
+        })
+        .on("mousemove", function(event){
+
+            d3.select("#tooltip")
+                .style("left", event.pageX + 15 + "px")
+                .style("top", event.pageY - 28 + "px");
+
+        })
+        .on("mouseout", function () {
+
+            d3.select(this)
+                .attr("stroke", "none");
+
+            d3.select("#tooltip")
+                .style("opacity", 0);
+
+        });
+
+    // ===============================
+    // LABELS
+    // ===============================
+
+    node.append("text")
+        .attr("dy", "0.31em")
+        .attr("x", d => d.x < Math.PI ? 12 : -12)
+        .attr("text-anchor", d =>
+            d.x < Math.PI ? "start" : "end"
+        )
+        .attr("transform", d =>
+            d.x >= Math.PI ? "rotate(180)" : null
+        )
+        .text(d => d.data.name)
+        .style("fill", "#e2e8f0")
+        .style("font-size", d => {
+
+            if (d.depth === 1) return "13px";
+            if (d.depth === 2) return "11px";
+
+            return "10px";
+
+        })
+        .style("font-weight", d =>
+            d.depth <= 1 ? "700" : "400"
+        );
+
+}
