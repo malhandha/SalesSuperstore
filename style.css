@@ -200,16 +200,46 @@ svg{
   }
 
 }
-#radialTree {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: auto;
+/* =========================
+   RADIAL TREE
+========================= */
+
+#radialTree{
+    width:100%;
+    min-height:950px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    overflow:hidden;
+    padding:40px;
 }
 
-#radialTree svg {
-    max-width: 100%;
+/* khusus radial tree svg */
+#radialTree svg{
+    width:100%;
+    height:900px;
+}
+
+/* jangan override semua svg */
+svg{
+  width:100%;
+}
+
+/* tooltip */
+#tooltip{
+    position:absolute;
+    background:#111827;
+    color:white;
+    padding:10px 14px;
+    border-radius:10px;
+    font-size:13px;
+    pointer-events:none;
+    opacity:0;
+    transition:0.2s;
+    border:1px solid #334155;
+    box-shadow:0 10px 30px rgba(0,0,0,0.4);
 }
 
 #tooltip {
